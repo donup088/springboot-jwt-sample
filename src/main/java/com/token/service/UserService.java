@@ -1,6 +1,6 @@
 package com.token.service;
 
-import com.token.dto.UserDto;
+import com.token.dto.MemberDto;
 import com.token.entity.Member;
 import com.token.entity.MemberRole;
 import com.token.repository.MemberRepository;
@@ -21,7 +21,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Member signup(UserDto userDto) {
+    public Member signup(MemberDto userDto) {
         if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
             throw new RuntimeException("이미 가입되어 있는 유저입니다.");
         }
