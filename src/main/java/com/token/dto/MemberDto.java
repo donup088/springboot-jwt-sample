@@ -12,7 +12,6 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberDto {
-
     @NotNull
     @Size(min = 3, max = 50)
     private String email;

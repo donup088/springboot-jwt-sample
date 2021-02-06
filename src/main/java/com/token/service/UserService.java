@@ -26,7 +26,6 @@ public class UserService {
             throw new RuntimeException("이미 가입되어 있는 유저입니다.");
         }
 
-
         List<MemberRole> role = new ArrayList<>();
         role.add(MemberRole.USER);
 

@@ -52,7 +52,7 @@ public class TokenProvider implements InitializingBean {
         Date validity = new Date(now + this.tokenValidityInMilliseconds);
 
         return Jwts.builder()
-//                .setSubject(authentication.getName())
+                .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
                 .claim("EMAIL",authentication.getName())
                 .signWith(key, SignatureAlgorithm.HS512)
