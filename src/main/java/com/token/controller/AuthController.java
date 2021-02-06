@@ -30,7 +30,7 @@ public class AuthController {
     @PostMapping("/authenticate")
     public ResponseEntity<TokenDto> authorize(@Valid @RequestBody LoginDto loginDto) {
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
+                new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
 
         //authenticate가 실행 될 때 loadUserByUsername 메소드가 실행된다.
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);

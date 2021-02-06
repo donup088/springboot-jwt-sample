@@ -1,56 +1,53 @@
 package com.token.service;
 
 import com.token.dto.UserDto;
-import com.token.entity.Authority;
-import com.token.entity.User;
-import com.token.repository.UserRepository;
+import com.token.entity.Member;
+import com.token.entity.MemberRole;
+import com.token.repository.MemberRepository;
 import com.token.util.SecurityUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private final UserRepository userRepository;
+    private final MemberRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
     @Transactional
-    public User signup(UserDto userDto) {
-        if (userRepository.findOneWithAuthoritiesByUsername(userDto.getUsername()).orElse(null) != null) {
+    public Member signup(UserDto userDto) {
+        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
             throw new RuntimeException("이미 가입되어 있는 유저입니다.");
         }
 
-        //빌더 패턴의 장점
-        Authority authority = Authority.builder()
-                .authorityName("ROLE_USER")
-                .build();
 
-        User user = User.builder()
-                .username(userDto.getUsername())
+        List<MemberRole> role = new ArrayList<>();
+        role.add(MemberRole.USER);
+
+        Member user = Member.builder()
+                .email(userDto.getEmail())
                 .password(passwordEncoder.encode(userDto.getPassword()))
                 .nickname(userDto.getNickname())
-                .authorities(Collections.singleton(authority))
                 .activated(true)
+                .roles(role)
                 .build();
 
         return userRepository.save(user);
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserWithAuthorities(String username) {
-        return userRepository.findOneWithAuthoritiesByUsername(username);
+    public Optional<Member> getUserWithAuthorities(String username) {
+        return userRepository.findByEmail(username);
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getMyUserWithAuthorities() {
-        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findOneWithAuthoritiesByUsername);
+    public Optional<Member> getMyUserWithAuthorities() {
+        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findByEmail);
     }
 }

@@ -15,7 +15,7 @@ public class UserDto {
 
     @NotNull
     @Size(min = 3, max = 50)
-    private String username;
+    private String email;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotNull
