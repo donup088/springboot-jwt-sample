@@ -41,12 +41,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Member> getUserWithAuthorities(String username) {
+    public Optional<Member> getMember(String username) {
         return userRepository.findByEmail(username);
     }
 
     @Transactional(readOnly = true)
-    public Optional<Member> getMyUserWithAuthorities() {
+    public Optional<Member> getCurrentMember() {
         return SecurityUtil.getCurrentUsername().flatMap(userRepository::findByEmail);
     }
 }
