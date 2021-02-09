@@ -6,6 +6,8 @@ import com.token.jwt.JwtSecurityConfig;
 import com.token.jwt.TokenProvider;
 import com.token.provider.LoginAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.filters.CorsFilter;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,15 +24,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final LoginAuthenticationProvider loginAuthenticationProvider;
+    private final CorsConfig corsConfig;
 
     @Override
     public void configure(WebSecurity web) {
         web.ignoring()
                 .antMatchers(
                         "/h2-console/**"
-                        ,"/favicon.ico"
-                        ,"/error"
+                        , "/favicon.ico"
+                        , "/error"
                 );
+        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
     @Override
@@ -43,6 +47,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity
                 // token을 사용하는 방식이기 때문에 csrf를 disable
                 .csrf().disable()
+                //corsFilter 적용
+                .addFilter(corsConfig.corsFilter())
                 //예외처리 적용
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
