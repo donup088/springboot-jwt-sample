@@ -6,9 +6,11 @@ import com.token.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -26,17 +28,14 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
         String username = (String) authentication.getPrincipal();
         String password = (String) authentication.getCredentials();
 
-        log.info("username: " + username);
-        log.info("password: " + password);
-
         Member member = memberRepository.findByEmail(username)
-                .orElseThrow(() -> new NoSuchElementException("입력하신 이메일의 해당하는 계정이 없습니다."));
+                .orElseThrow(() -> new UsernameNotFoundException("입력하신 이메일의 해당하는 계정이 없습니다."));
 
         if (isCorrectPassword(password, member)) {
-            return PostAuthorizationToken.getTokenFromAccountContext(MemberAdapter.fromAccountModel(member));
+            return PostAuthorizationToken.getTokenFromAccountContext(MemberAdapter.fromMemberModel(member));
         }
 
-        throw new NoSuchElementException("비밀번호가 잘못되었습니다.");
+        throw new BadCredentialsException("비밀번호가 잘못되었습니다.");
     }
 
     @Override

@@ -21,7 +21,7 @@ public class MemberAdapter extends User {
         this.member = member;
     }
 
-    public static MemberAdapter fromAccountModel(Member member) {
+    public static MemberAdapter fromMemberModel(Member member) {
         return new MemberAdapter(member, member.getEmail(), member.getPassword(), authorities(member.getRoles()));
     }
 
