@@ -2,9 +2,8 @@ package com.token.config;
 
 import com.token.jwt.JwtAccessDeniedHandler;
 import com.token.jwt.JwtAuthenticationEntryPoint;
-import com.token.jwt.JwtSecurityConfig;
-import com.token.jwt.TokenProvider;
-import com.token.provider.LoginAuthenticationProvider;
+import com.token.jwt.JwtFilter;
+import com.token.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -16,16 +15,19 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final TokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    private final LoginAuthenticationProvider loginAuthenticationProvider;
     private final CorsConfig corsConfig;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtFilter jwtFilter;
 
     @Override
     public void configure(WebSecurity web) {
@@ -40,7 +42,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(loginAuthenticationProvider);
+        auth.userDetailsService(customUserDetailsService)
+                .passwordEncoder(passwordEncoder);
     }
 
 
@@ -57,6 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 //corsFilter 적용
                 .addFilter(corsConfig.corsFilter())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 //예외처리 적용
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
@@ -79,9 +83,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/hello").permitAll()
                 .antMatchers("/api/authenticate").permitAll()
                 .antMatchers("/api/signup").permitAll()
-                .anyRequest().authenticated()
-                // addFilterBefore로 등록 했던 JwtSecurityConfig 클래스 적용할 수 있도록함
-                .and()
-                .apply(new JwtSecurityConfig(tokenProvider));
+                .anyRequest().authenticated();
     }
 }

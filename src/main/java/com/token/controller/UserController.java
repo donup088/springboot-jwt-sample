@@ -2,6 +2,7 @@ package com.token.controller;
 
 import com.token.dto.MemberDto;
 import com.token.entity.Member;
+import com.token.entity.MemberAdapter;
 import com.token.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
