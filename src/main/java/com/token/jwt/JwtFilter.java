@@ -24,6 +24,7 @@ public class JwtFilter extends OncePerRequestFilter {
     //토큰의 인증정보를 SecurityContext에 저장장
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
+        log.info("jwtFilter-----");
         String jwt = resolveToken(req);
         String requestURI = req.getRequestURI();
 

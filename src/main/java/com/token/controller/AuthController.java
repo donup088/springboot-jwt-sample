@@ -28,6 +28,8 @@ public class AuthController {
     //로그인 경로로
     @PostMapping("/authenticate")
     public ResponseEntity<TokenDto> authorize(@Valid @RequestBody LoginDto loginDto) {
+        System.out.println("-------");
+        System.out.println("loginDto = " + loginDto);
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
 
