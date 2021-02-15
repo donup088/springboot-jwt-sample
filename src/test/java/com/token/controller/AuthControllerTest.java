@@ -2,9 +2,11 @@ package com.token.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.token.dto.LoginDto;
+import com.token.dto.MemberDto;
 import com.token.entity.Member;
 import com.token.entity.MemberRole;
 import com.token.repository.MemberRepository;
+import com.token.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,30 +26,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class AuthControllerTest {
-
-    @Autowired
-    private MemberRepository memberRepository;
-
     @Autowired
     private MockMvc mvc;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private UserService userService;
 
     @Test
     public void getToken() throws Exception {
         final String email = "test@example.com";
         final String password = "1234";
-        Member member = Member.builder()
+        MemberDto memberDto = MemberDto.builder()
                 .email(email)
-                .password(passwordEncoder.encode(password))
-                .roles(List.of(MemberRole.ADMIN, MemberRole.USER))
+                .password(password)
                 .nickname("동그라미")
                 .build();
-        memberRepository.save(member);
+        userService.signup(memberDto);
 
         LoginDto loginDto = new LoginDto();
         loginDto.setEmail(email);
