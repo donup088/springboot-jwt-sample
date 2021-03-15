@@ -6,6 +6,8 @@ import com.token.dto.TokenDto;
 import com.token.entity.Member;
 import com.token.entity.MemberAdapter;
 import com.token.entity.MemberRole;
+import com.token.exception.CUserExistException;
+import com.token.exception.CUserNotFoundException;
 import com.token.jwt.JwtFilter;
 import com.token.jwt.TokenProvider;
 import com.token.repository.MemberRepository;
@@ -26,7 +28,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class UserController {
+public class MemberController {
     private final UserService userService;
     private final KakaoService kakaoService;
     private final TokenProvider tokenProvider;
@@ -54,9 +56,9 @@ public class UserController {
     @PostMapping("/signin/{provider}")
     public ResponseEntity signinByProvider(@PathVariable String provider,
                                            @RequestParam String accessToken) {
-
         KakaoProfile profile = kakaoService.getKakaoProfile(accessToken);
-        Member member = memberRepository.findByUidAndProvider(profile.getId(), provider).get();
+        Member member = memberRepository.findByUidAndProvider(profile.getId(), provider)
+                .orElseThrow(CUserNotFoundException::new);
         String jwt = tokenProvider.createToken(member.getEmail());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
@@ -67,10 +69,11 @@ public class UserController {
     public ResponseEntity signupProvider(@PathVariable("provider") String provider,
                                          @RequestParam("accessToken") String accessToken,
                                          @RequestParam("name") String name) {
-        System.out.println("signupProvider");
         KakaoProfile profile = kakaoService.getKakaoProfile(accessToken);
-        //TODO 예외처리
-
+        Optional<Member> optionalMember = memberRepository.findByUidAndProvider(profile.getId(), provider);
+        if(optionalMember.isPresent()){
+            throw new CUserExistException();
+        }
         memberRepository.save(Member.builder()
                 .uid(profile.getId())
                 .provider(provider)
