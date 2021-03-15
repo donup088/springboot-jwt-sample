@@ -5,17 +5,30 @@ spring:
       settings:
         web-allow-others: true
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:tcp://localhost/~/test
     driver-class-name: org.h2.Driver
     username: sa
   jpa:
+    hibernate:
+      ddl-auto: update
     database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         format_sql: true
         show_sql: true
 
+  social:
+    kakao:
+      client_id:  # 앱생성시 받은 REST API 키
+      redirect: /social/login/kakao
+      url:
+        login: https://kauth.kakao.com/oauth/authorize
+        token: https://kauth.kakao.com/oauth/token
+        profile: https://kapi.kakao.com/v2/user/me
+  url:
+    base: http://localhost:8080
+
 jwt:
   header: Authorization
   secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
-  token-validity-in-seconds: 60
+  token-validity-in-seconds: 1800
