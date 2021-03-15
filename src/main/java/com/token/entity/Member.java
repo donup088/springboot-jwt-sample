@@ -21,6 +21,9 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true, length = 50)
+    private Long uid;
+
     @Column(name = "email", length = 50, unique = true)
     private String email;
 
@@ -30,6 +33,8 @@ public class Member {
 
     @Column(name = "nickname", length = 50)
     private String nickname;
+
+    private String provider;
 
     @JsonIgnore
     @Column(name = "activated")

@@ -19,6 +19,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -57,6 +58,19 @@ public class TokenProvider implements InitializingBean {
                 .setExpiration(validity)
                 .compact();
     }
+
+    // Jwt 토큰 생성
+    public String createToken(String email) {
+        Claims claims = Jwts.claims().setSubject(email);
+        long now = (new Date()).getTime();
+        Date validity = new Date(now + this.tokenValidityInMilliseconds);
+        return Jwts.builder()
+                .setClaims(claims) // 데이터
+                .setExpiration(validity)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
     //토큰에 담겨있는 정보를 사용해서 Authentication 반환
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts
