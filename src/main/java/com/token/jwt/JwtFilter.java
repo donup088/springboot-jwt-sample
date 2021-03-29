@@ -1,9 +1,13 @@
 package com.token.jwt;
 
+import com.token.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,21 +24,20 @@ import java.io.IOException;
 public class JwtFilter extends OncePerRequestFilter {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     private final TokenProvider tokenProvider;
-
-    //토큰의 인증정보를 SecurityContext에 저장장
+    private final CustomUserDetailsService customUserDetailsService;
+    //토큰의 인증정보를 SecurityContext에 저장
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         log.info("jwtFilter-----");
         String jwt = resolveToken(req);
-        String requestURI = req.getRequestURI();
+        if (StringUtils.hasText(jwt)) {
+            String email = tokenProvider.getUserEmailFromAccessToken(jwt);
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-        if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt,res)) {
-            Authentication authentication = tokenProvider.getAuthentication(jwt);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.info("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
-        } else {
-            log.info("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         }
+
         filterChain.doFilter(req, res);
     }
 

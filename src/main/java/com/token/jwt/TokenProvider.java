@@ -1,5 +1,6 @@
 package com.token.jwt;
 
+import com.token.exception.JwtCustomException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -13,6 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Key;
@@ -71,38 +73,24 @@ public class TokenProvider implements InitializingBean {
                 .compact();
     }
 
-    //토큰에 담겨있는 정보를 사용해서 Authentication 반환
-    public Authentication getAuthentication(String token) {
-        Claims claims = Jwts
-                .parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-
-        User principal = new User(claims.getSubject(), "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+    public String getUserEmailFromAccessToken(String token) throws RuntimeException {
+        return getClaims(token).getBody().getSubject();
     }
 
-    public boolean validateToken(String token, HttpServletResponse res) throws IOException {
+    private Jws<Claims> getClaims(String token) throws RuntimeException {
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+        Jws<Claims> claims = null;
+
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
-        } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
-        } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
+            claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+        } catch (JwtException ex) {
+            log.error(ex.getMessage());
+            throw new JwtCustomException("다시 로그인 해주세요");
         }
-        return false;
+
+        return claims;
     }
 }

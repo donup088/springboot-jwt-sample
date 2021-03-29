@@ -4,16 +4,18 @@ import com.token.dto.KakaoProfile;
 import com.token.dto.MemberDto;
 import com.token.dto.TokenDto;
 import com.token.entity.Member;
-import com.token.entity.MemberAdapter;
 import com.token.entity.MemberRole;
 import com.token.exception.CUserExistException;
 import com.token.exception.CUserNotFoundException;
 import com.token.jwt.JwtFilter;
 import com.token.jwt.TokenProvider;
 import com.token.repository.MemberRepository;
+import com.token.service.CurrentUser;
+import com.token.service.CustomUserDetails;
 import com.token.service.KakaoService;
 import com.token.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +23,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Slf4j
 public class MemberController {
     private final UserService userService;
     private final KakaoService kakaoService;
@@ -43,7 +45,8 @@ public class MemberController {
 
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public ResponseEntity<Member> getMyUserInfo() {
+    public ResponseEntity<Member> getMyUserInfo(@CurrentUser CustomUserDetails member) {
+        log.info(""+member.getMember());
         return ResponseEntity.ok(userService.getCurrentMember().get());
     }
 

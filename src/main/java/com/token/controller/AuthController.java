@@ -36,8 +36,7 @@ public class AuthController {
         //authenticate가 실행 될 때 loadUserByUsername 메소드가 실행된다.
         //생성된 Authentication객체를 SecurityContextHolder에 저장   SecurityContextHolder.getContext().setAuthentication(authentication);
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-
-        //jwt 토큰 생성성
+        //jwt 토큰 생성
         String jwt = tokenProvider.createToken(authentication);
 
         HttpHeaders httpHeaders = new HttpHeaders();

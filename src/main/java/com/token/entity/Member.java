@@ -15,13 +15,12 @@ import java.util.List;
 @NoArgsConstructor
 public class Member {
 
-    @JsonIgnore
     @Id
     @Column(name = "member_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(length = 50)
     private Long uid;
 
     @Column(name = "email", length = 50, unique = true)

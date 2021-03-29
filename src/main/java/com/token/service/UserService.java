@@ -30,6 +30,7 @@ public class UserService {
         role.add(MemberRole.USER);
 
         Member user = Member.builder()
+                .uid(0L)
                 .email(userDto.getEmail())
                 .password(passwordEncoder.encode(userDto.getPassword()))
                 .nickname(userDto.getNickname())
@@ -45,8 +46,4 @@ public class UserService {
         return userRepository.findByEmail(username);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Member> getCurrentMember() {
-        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findByEmail);
-    }
 }
